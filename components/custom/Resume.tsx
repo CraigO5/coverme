@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles } from "lucide-react"; // Add this at the top of your file
+import { Sparkles, ArrowRight, FileText } from "lucide-react";
 import SectionCard from "./SectionCard";
 import confetti from "canvas-confetti";
 import {
@@ -126,76 +126,95 @@ export default function Resume({
     localStorage.setItem("parsed-text", parsedText || "");
     localStorage.setItem("summary", summarizedText || "");
     localStorage.setItem("name", fullName || "");
-    // localStorage.setItem("specifications", specifications || "");
   }, [fileName, parsedText, summarizedText, fullName]);
 
   return (
-    <section
-      id="upload"
-      className={`${sectionCard} bg-gray-900 text-white mt-8`}
-    >
-      <SectionCard title="Resume Upload">
-        <label className="block mb-2 font-medium text-green-600 highlight">
-          Step 1: Upload your resume! (PDF format only)
-        </label>
-        <label className="inline-block cursor-pointer px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md font-medium">
-          Choose File
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </label>
-        {(file || parsedText) && (
-          <p className="mt-2 text-gray-400 text-sm">
-            Selected: {fileName || ""}
-          </p>
-        )}
-        <div className="mt-4 flex gap-4">
+    <section id="upload" className={sectionCard}>
+      <SectionCard title="Resume" index="01">
+        <div className="cm-sub">
+          <span className="cm-sub__name">Upload</span>
+        </div>
+        <p className="cm-step">
+          Add your resume as a PDF — we&rsquo;ll extract the text so you can
+          review it before summarizing.
+        </p>
+
+        <div className="cm-upload">
+          <label className={buttonStyle}>
+            Choose file
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
           <button
             disabled={resumeLoading || !file}
             onClick={handleUpload}
-            className={buttonStyle}
+            className={`${buttonStyle} cm-btn--primary`}
           >
-            {resumeLoading ? "Uploading..." : "Upload"}
+            {resumeLoading ? (
+              "Uploading…"
+            ) : (
+              <>
+                Upload
+                <ArrowRight className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+              </>
+            )}
           </button>
         </div>
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-        {parsedText && (
-          <div className="mt-4 mb-4">
-            <h3 className="font-semibold mb-2">Parsed Resume Text</h3>
-            <pre className={staticTextAreaStyle}>{parsedText}</pre>
-            <p className="text-sm text-gray-400 mt-1">
-              Length: {parsedText.length} characters
-            </p>
+
+        {(file || parsedText) && (
+          <div className="cm-file__meta" style={{ marginTop: 14 }}>
+            <FileText className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+            {fileName || "Selected file"}
           </div>
         )}
+
+        {error && <p className="cm-err">{error}</p>}
+
         {parsedText && (
-          <>
-            <p className="mb-4 text-green-600">
-              Step 2: Summarize your resume with AI!
+          <div className="cm-parsed">
+            <div className="cm-label">
+              Parsed text · {parsedText.length} chars
+            </div>
+            <pre className={staticTextAreaStyle}>{parsedText}</pre>
+          </div>
+        )}
+
+        {parsedText && (
+          <div className="cm-parsed">
+            <div className="cm-sub">
+              <span className="cm-sub__name">Summarize</span>
+            </div>
+            <p className="cm-step">
+              Condense your resume into a short profile the generator reuses for
+              every cover letter.
             </p>
             <button
               disabled={summarizeLoading}
               onClick={handleSummarizeText}
-              className={`${buttonStyle} flex items-center justify-center gap-2`}
+              className={`${buttonStyle} cm-btn--primary`}
             >
               {summarizeLoading ? (
-                "Summarizing..."
+                "Summarizing…"
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-                  Summarize Resume
+                  <Sparkles className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+                  Summarize resume
                 </>
               )}
-            </button>{" "}
-          </>
+            </button>
+          </div>
         )}
+
         {summarizedText && (
-          <div className="mt-4">
-            <h3 className="font-semibold">Resume Summary</h3>
-            <p className="mb-2 italic text-gray-400">(Edit if needed)</p>
+          <div className="cm-parsed">
+            <h3 className="cm-h3">Resume summary</h3>
+            <p className="cm-note" style={{ marginBottom: 8 }}>
+              Edit if needed.
+            </p>
             <textarea
               value={summarizedText}
               onChange={(e) => setSummarizedText(e.target.value)}
@@ -204,15 +223,13 @@ export default function Resume({
               spellCheck="false"
               className={textAreaStyle}
             />
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="cm-note" style={{ marginTop: 6 }}>
               {summarizedText.length} / 1000 characters
             </p>
-            <div className="mb-5 mt-2">
-              <p className="mb-4 text-yellow-600">
-                Optional: Add your full name to add as a header for your
-                downloadable cover letter PDF!
-              </p>
-              <div className="flex lg-flex-row gap-4 items-center mb-2">
+
+            <div style={{ marginTop: 20 }}>
+              <div className="cm-label">Optional — name for PDF header</div>
+              <div className="cm-goal__set" style={{ marginBottom: 8 }}>
                 <input
                   type="text"
                   value={fullNameInput}
@@ -228,11 +245,10 @@ export default function Resume({
                     setFullNameInput("");
                   }}
                 >
-                  <span className="sm:hidden">Submit</span>
-                  <span className="hidden sm:inline">Submit Name</span>{" "}
+                  Submit
                 </button>
               </div>
-              <p className="opacity-50 text-sm">Name: {fullName}</p>
+              {fullName && <p className="cm-note">Name: {fullName}</p>}
             </div>
           </div>
         )}

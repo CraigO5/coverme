@@ -152,79 +152,79 @@ export default function JobList({
   return (
     <>
       {jobs.length != 0 && (
-        <section
-          id="jobs"
-          className={`${sectionCard} bg-gray-900 text-white mt-8`}
-        >
-          <SectionCard title="Generated Letters">
-            <div className="pb-5">
-              <p className="mb-4 text-green-600">
-                Step 4: Generate cover letters for each job!
-              </p>
-              <div className="flex gap-5 sm:flex-row flex-col">
-                <button
-                  className={buttonStyle + " mb-4 flex items-center gap-2"}
-                  onClick={handleGenerateCoverLetters}
-                  disabled={coverLettersLoading || !addNew || !summarizedText}
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-                  {coverLettersLoading
-                    ? "Generating..."
-                    : "Generate Cover Letters"}
-                </button>
-                <button className={buttonStyle + " mb-4"} onClick={clearJobs}>
-                  Clear All
-                </button>
-              </div>
+        <section id="jobs" className={sectionCard}>
+          <SectionCard title="Generated Letters" index="03">
+            <p className="cm-step">
+              Generate a tailored cover letter for every job you&rsquo;ve added,
+              then copy it or download a formatted PDF.
+            </p>
+
+            <div className="cm-actions" style={{ marginBottom: 22 }}>
+              <button
+                className={`${buttonStyle} cm-btn--primary`}
+                onClick={handleGenerateCoverLetters}
+                disabled={coverLettersLoading || !addNew || !summarizedText}
+              >
+                <Sparkles className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+                {coverLettersLoading
+                  ? "Generating…"
+                  : "Generate cover letters"}
+              </button>
+              <button className={buttonStyle} onClick={clearJobs}>
+                Clear all
+              </button>
             </div>
 
-            <div className=" scrollbar-always max-h-[100vh] overflow-y-auto px-10 bg-stone-950 rounded-2xl ">
+            <div className="cm-jobs scrollbar-always">
               {jobs.map((job, i) => (
-                <div
-                  key={i}
-                  className="border border-gray-700 bg-gray-900 rounded-lg p-4 mb-4 mt-4 transition-all duration-100 hover:scale-101 hover:-translate-x-0.5 hover:shadow-[4px_4px_0px_#000000]"
-                >
-                  <h3 className="font-semibold mb-2 text-lg">
+                <div key={i} className="cm-jobcard">
+                  <h3 className="cm-jobcard__title">
                     {job.title || "Untitled Role"} @{" "}
                     {job.company || "Unknown Company"}
                   </h3>
-                  <pre className="text-sm p-3 rounded border border-gray-700 bg-gray-800 max-h-60 overflow-y-auto mb-2 whitespace-pre-wrap">
-                    {job.description}
-                  </pre>
+                  <pre className="cm-pre">{job.description}</pre>
 
                   {coverLetterLoading[i] ? (
-                    <p className="text-gray-400">Generating cover letter...</p>
+                    <p className="cm-jobcard__status">
+                      Generating cover letter…
+                    </p>
                   ) : (
-                    <p className="text-gray-400">
+                    <p
+                      className={`cm-jobcard__status${
+                        coverLetters[i] ? " is-done" : ""
+                      }`}
+                    >
                       {coverLetters[i]
-                        ? "Cover letter generated!"
-                        : "Click 'Generate Cover Letters' to create."}
+                        ? "Cover letter generated."
+                        : "Click “Generate cover letters” to create."}
                     </p>
                   )}
+
                   {coverLetters[i] && (
-                    <div className="flex flex-col">
+                    <>
                       <textarea
                         defaultValue={coverLetters[i]}
-                        className="text-sm mt-4 p-3 rounded border border-gray-700 bg-gray-800 h-75 overflow-y-auto whitespace-pre-wrap"
+                        className="cm-textarea"
+                        style={{ marginTop: 14, minHeight: 280 }}
                       ></textarea>
-                      <div className="flex flex-col sm:flex-row justify-center sm:gap-5">
+                      <div className="cm-actions">
                         <button
                           onClick={() => {
                             copyText(coverLetters[i]);
                             setCopyTexts((prev) => ({ ...prev, [i]: true }));
                           }}
-                          className={`${buttonStyle} mt-2`}
+                          className={buttonStyle}
                         >
-                          {copyTexts[i] ? "Copied!" : "Copy to Clipboard"}
+                          {copyTexts[i] ? "Copied!" : "Copy to clipboard"}
                         </button>
                         <button
                           onClick={() => handleDownloadPDF(i, job)}
-                          className={`${buttonStyle} mt-2`}
+                          className={buttonStyle}
                         >
                           {copyTexts[i] ? "Downloaded!" : "Download PDF"}
                         </button>
                       </div>
-                    </div>
+                    </>
                   )}
                 </div>
               ))}

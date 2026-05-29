@@ -26,7 +26,6 @@ export default function JobInput({
   const [jobTitleInput, setJobTitleInput] = useState<string>("");
   const [jobDescriptionInput, setJobDescriptionInput] = useState<string>("");
   const [companyNameInput, setCompanyNameInput] = useState<string>("");
-  // const [jobLinkInput, setJobLinkInput] = useState<string>("");
 
   const handleSubmitJob = () => {
     const trimmedTitle = jobTitleInput.trim();
@@ -52,72 +51,49 @@ export default function JobInput({
   return (
     <>
       {summarizedText && (
-        <section
-          id="add-job"
-          className={`${sectionCard} bg-gray-900 text-white mt-8`}
-        >
-          <SectionCard title="Job Description">
-            <p className="mb-4 text-green-600">
-              Step 3: Paste a job description you’re applying to (from LinkedIn,
-              Indeed, etc.).
+        <section id="add-job" className={sectionCard}>
+          <SectionCard title="Job Description" index="02">
+            <p className="cm-step">
+              Paste a job posting you&rsquo;re applying to — from LinkedIn,
+              Indeed, or a company page. Add as many as you like.
             </p>
-            <input
-              type="text"
-              value={jobTitleInput}
-              onChange={(e) => setJobTitleInput(e.target.value)}
-              placeholder="Job Title (Optional)"
-              maxLength={100}
-              className={inputStyle + " mb-2"}
-            />
-            <input
-              type="text"
-              value={companyNameInput}
-              onChange={(e) => setCompanyNameInput(e.target.value)}
-              placeholder="Company Name (Optional)"
-              maxLength={100}
-              className={inputStyle + " mb-2"}
-            />
+            <div className="cm-goal__set" style={{ marginBottom: 12 }}>
+              <input
+                type="text"
+                value={jobTitleInput}
+                onChange={(e) => setJobTitleInput(e.target.value)}
+                placeholder="Job title (optional)"
+                maxLength={100}
+                className={inputStyle}
+              />
+              <input
+                type="text"
+                value={companyNameInput}
+                onChange={(e) => setCompanyNameInput(e.target.value)}
+                placeholder="Company name (optional)"
+                maxLength={100}
+                className={inputStyle}
+              />
+            </div>
             <textarea
               value={jobDescriptionInput}
               onChange={(e) => setJobDescriptionInput(e.target.value)}
-              placeholder="Paste full job description..."
+              placeholder="Paste full job description…"
               maxLength={4000}
               rows={6}
               className={textAreaStyle}
             />
 
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="cm-note" style={{ marginTop: 6 }}>
               {jobDescriptionInput.length} / 4000 characters
             </p>
-            {/* <button
-              onClick={handlePasteJobDescription}
-              className={`${buttonStyle} mt-3`}
+            <button
+              onClick={handleSubmitJob}
+              className={`${buttonStyle} cm-btn--primary`}
+              style={{ marginTop: 14 }}
             >
-              Paste Job Description
-            </button> */}
-            <button onClick={handleSubmitJob} className={`${buttonStyle} mt-3`}>
-              Add Job
+              Add job
             </button>
-            {/* <p className="my-10 font-bold text-2xl">OR</p>
-            <p className="text-green-600 mb-4">
-              Step 3: Paste a job link (Indeed)
-            </p>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={jobLinkInput}
-                onChange={(e) => setJobLinkInput(e.target.value)}
-                placeholder="https://www.indeed.com/viewjob..."
-                maxLength={300}
-                className={inputStyle + " flex-1"}
-              />
-              <button
-                onClick={() => handleFetchFromLink(jobLinkInput)}
-                className={buttonStyle}
-              >
-                Fetch
-              </button>
-            </div> */}
           </SectionCard>
         </section>
       )}

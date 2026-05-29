@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import SectionCard from "./SectionCard";
-import { motion, AnimatePresence } from "framer-motion";
+import { Minus, Plus, Trash2, Clock } from "lucide-react";
+
 type Props = {
   buttonStyle: string;
   sectionCard: string;
@@ -13,8 +14,6 @@ export default function Stats({ buttonStyle, lettersGenerated }: Props) {
   const [weeklyJobs, setWeeklyJobs] = useState(0);
   const [dailyGoal, setDailyGoal] = useState(10);
   const [dailyGoalInput, setDailyGoalInput] = useState(10);
-  // const [weeklyGoal, setWeeklyGoal] = useState(70);
-  // const [weeklyGoalInput, setWeeklyGoalInput] = useState(70);
 
   function formatTimeAgo(timestamp: number) {
     const diff = Date.now() - timestamp;
@@ -26,24 +25,6 @@ export default function Stats({ buttonStyle, lettersGenerated }: Props) {
     if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
     if (minutes > 0) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
     return "just now";
-  }
-
-  function formatMinutesToTime(minutes: number): string {
-    const weeks = Math.floor(minutes / (60 * 24 * 7));
-    const days = Math.floor((minutes % (60 * 24 * 7)) / (60 * 24));
-    const hours = Math.floor((minutes % (60 * 24)) / 60);
-    const remainingMinutes = minutes % 60;
-
-    const parts = [];
-    if (weeks > 0) parts.push(`${weeks} week${weeks > 1 ? "s" : ""}`);
-    if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
-    if (hours > 0) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
-    if (remainingMinutes > 0)
-      parts.push(
-        `${remainingMinutes} minute${remainingMinutes > 1 ? "s" : ""}`
-      );
-
-    return parts.length > 0 ? parts.join(", ") : "less than a minute";
   }
 
   useEffect(() => {
@@ -85,139 +66,135 @@ export default function Stats({ buttonStyle, lettersGenerated }: Props) {
       localStorage.getItem("weekly-jobs") || "0",
       10
     );
-    // const storedWeeklyGoal = parseInt(
-    //   localStorage.getItem("weekly-goal") || "0",
-    //   10
-    // );
 
     setDailyJobs(storedDailyJobs);
     setDailyGoal(storedDailyGoal);
     setWeeklyJobs(storedWeeklyJobs);
-    // setWeeklyGoal(storedWeeklyGoal);
   }, []);
 
   useEffect(() => {
     localStorage.setItem("daily-jobs", dailyJobs.toString());
     localStorage.setItem("daily-goal", dailyGoal.toString());
     localStorage.setItem("weekly-jobs", weeklyJobs.toString());
-    // localStorage.setItem("weekly-goal", weeklyGoal.toString());
   }, [dailyJobs, dailyGoal, weeklyJobs]);
 
+  // ---- derived display values (no logic change) ----
+  const goalNum = Number.isFinite(dailyGoal) && dailyGoal > 0 ? dailyGoal : 0;
+  const cellCount = Math.min(goalNum, 30);
+  const goalMet = goalNum > 0 && dailyJobs >= goalNum;
+
+  const minutesSaved = lettersGenerated * 15;
+  const savedValue =
+    minutesSaved >= 60
+      ? (Math.round((minutesSaved / 60) * 10) / 10).toString()
+      : minutesSaved.toString();
+  const savedUnit = minutesSaved >= 60 ? "hrs" : "min";
+
   return (
-    <>
-      <section className={`w-full max-w-3xl text-white mt-8 `}>
-        <SectionCard title="Statistics" defaultOpen={false}>
-          <div className="space-y-3">
-            <div className="flex flex-col mb-4">
-              <div className="flex gap-2 items-center">
-                <p>Today's goal: </p>
-                <input
-                  type="text"
-                  value={dailyGoalInput}
-                  onChange={(e) => setDailyGoalInput(parseInt(e.target.value))}
-                  placeholder="Job Title (Optional)"
-                  maxLength={100}
-                  className="p-1 border border-gray-700 bg-gray-800 rounded-md w-15"
-                />
-                <button
-                  className={buttonStyle}
-                  onClick={() => setDailyGoal(dailyGoalInput)}
-                >
-                  Submit
-                </button>
-              </div>
-              <div className="flex gap-2 items-center" />
-            </div>
-            <div className="h-[1px] bg-white/20 mb-4" />
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-2 items-center w-full">
-              {" "}
-              <div className="flex gap-2">
-                ☀️
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key={dailyJobs} // triggers animation on count change
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-lg font-semibold"
-                  >
-                    <span
-                      className={
-                        dailyJobs < dailyGoal / 2
-                          ? "text-red-400"
-                          : dailyJobs >= dailyGoal
-                          ? "text-green-400"
-                          : "text-yellow-400"
-                      }
-                    >
-                      {dailyJobs}/{dailyGoal}{" "}
-                    </span>
-                  </motion.p>
-                </AnimatePresence>
-                <span>jobs applied for today</span>
-              </div>
-              <div className={"flex gap-2 justify-center"}>
-                <button
-                  className={buttonStyle}
-                  onClick={() => {
-                    setWeeklyJobs((e) => e - dailyJobs);
-                    setDailyJobs(0);
-                  }}
-                >
-                  🗑️ Clear
-                </button>
-                <button
-                  className={buttonStyle}
-                  onClick={() => {
-                    setDailyJobs((count) => Math.max(count - 1, 0));
-                    setWeeklyJobs((count) => Math.max(count - 1, 0));
-                  }}
-                >
-                  -
-                </button>
-                <button
-                  className={buttonStyle}
-                  onClick={() => {
-                    setDailyJobs((count) => count + 1);
-                    setWeeklyJobs((count) => Math.max(count + 1, 0));
-                  }}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div className="h-[1px] bg-white/20 mb-4" />
-            <p>
-              📩{" "}
-              <span className="font-bold text-green-300">
-                {lettersGenerated}
-              </span>{" "}
-              cover letters generated
-            </p>{" "}
-            <div className="h-[1px] bg-white/20 mb-4" />
-            <p>
-              ⏳{" "}
-              <span className="font-bold text-green-300">
-                {formatMinutesToTime(lettersGenerated * 15)}
-              </span>{" "}
-              saved
-            </p>
-            <div className="h-[1px] bg-white/20 mb-4" />
-            <p>
-              🔥 <span className="font-bold text-green-300">{dailyStreak}</span>{" "}
-              day streak. Keep it up!
-            </p>
-            <div className="h-[1px] bg-white/20 mb-4" />
-            <p>
-              🕒 Last login:{" "}
-              <span className="font-bold text-green-300">
-                {lastLoginTime ? formatTimeAgo(lastLoginTime) : "unknown"}
-              </span>
-            </p>
+    <section className="w-full">
+      <SectionCard title="Statistics" defaultOpen={false} plain>
+        {/* set daily goal */}
+        <div className="cm-goal__set">
+          <span className="cm-label" style={{ margin: 0 }}>
+            Daily goal
+          </span>
+          <input
+            type="text"
+            value={Number.isNaN(dailyGoalInput) ? "" : dailyGoalInput}
+            onChange={(e) => setDailyGoalInput(parseInt(e.target.value))}
+            aria-label="Daily goal"
+            maxLength={3}
+            className="cm-input cm-input--sm"
+          />
+          <button
+            className={buttonStyle}
+            onClick={() => setDailyGoal(dailyGoalInput)}
+          >
+            Set
+          </button>
+        </div>
+
+        {/* progress */}
+        <div className="cm-goal__row">
+          <span className="cm-goal__label">
+            Applied today
+            <span className={`cm-goal__count${goalMet ? " is-done" : ""}`}>
+              {dailyJobs} of <b>{goalNum}</b>
+            </span>
+          </span>
+          <div className="cm-stepper">
+            <button
+              onClick={() => {
+                setWeeklyJobs((e) => e - dailyJobs);
+                setDailyJobs(0);
+              }}
+              aria-label="Clear applied count"
+              title="Clear"
+            >
+              <Trash2 className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+            </button>
+            <button
+              onClick={() => {
+                setDailyJobs((count) => Math.max(count - 1, 0));
+                setWeeklyJobs((count) => Math.max(count - 1, 0));
+              }}
+              aria-label="Decrease applied count"
+            >
+              <Minus className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+            </button>
+            <button
+              onClick={() => {
+                setDailyJobs((count) => count + 1);
+                setWeeklyJobs((count) => Math.max(count + 1, 0));
+              }}
+              aria-label="Increase applied count"
+            >
+              <Plus className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+            </button>
           </div>
-        </SectionCard>
-      </section>
-    </>
+        </div>
+        <div className="cm-cells">
+          {Array.from({ length: cellCount }).map((_, i) => (
+            <div
+              key={i}
+              className={`cm-cell${i < dailyJobs ? " is-on" : ""}`}
+            />
+          ))}
+        </div>
+
+        {/* figure stats */}
+        <div className="cm-figures">
+          <div className="cm-figure">
+            <div className="cm-figure__top">
+              <span className="cm-figure__num is-accent">
+                {lettersGenerated}
+              </span>
+            </div>
+            <div className="cm-figure__label">Letters generated</div>
+          </div>
+          <div className="cm-figure">
+            <div className="cm-figure__top">
+              <span className="cm-figure__num">{savedValue}</span>
+              <span className="cm-figure__unit">{savedUnit}</span>
+            </div>
+            <div className="cm-figure__label">Time saved</div>
+          </div>
+          <div className="cm-figure">
+            <div className="cm-figure__top">
+              <span className="cm-figure__num">{dailyStreak}</span>
+              <span className="cm-figure__unit">
+                {dailyStreak === 1 ? "day" : "days"}
+              </span>
+            </div>
+            <div className="cm-figure__label">Active streak</div>
+          </div>
+        </div>
+
+        <div className="cm-meta">
+          <Clock className="cm-icon cm-icon--sm" strokeWidth={1.75} />
+          Last active <b>{lastLoginTime ? formatTimeAgo(lastLoginTime) : "unknown"}</b>
+        </div>
+      </SectionCard>
+    </section>
   );
 }
